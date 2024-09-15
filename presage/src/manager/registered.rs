@@ -819,7 +819,7 @@ impl<S: Store> Manager<S, Registered> {
         let recipient = recipient_addr.into();
         let mut content_body: ContentBody = message.into();
 
-        let (store_expire_timer, store_expire_timer_version) = self
+        let store_expire_timer = self
             .store
             .expire_timer(&Thread::Contact(recipient.uuid))
             .unwrap_or_default();
@@ -829,12 +829,15 @@ impl<S: Store> Manager<S, Registered> {
                 expire_timer: ref mut timer,
                 expire_timer_version: ref mut version,
                 ..
-            }) if timer.is_none() => {
-                *timer = store_expire_timer;
-                *version = store_expire_timer_version;
-            } else {
-                *version = store_expire_timer_version + 1;
+            }) => {
+                if timer.is_none() {
+                    *timer = store_expire_timer.map(|(t, _)| t);
+                    *version = Some(store_expire_timer.map(|(_, v)| v).unwrap_or_default());
+                } else {
+                    *version = Some(store_expire_timer.map(|(_, v)| v).unwrap_or_default() + 1);
+                }
             }
+            _ => {}
         }
 
         let sender_certificate = self.sender_certificate().await?;
@@ -929,12 +932,12 @@ impl<S: Store> Manager<S, Registered> {
                 ..
             }) if timer.is_none() => {
                 // Set the expire timer to None for errors.
-                let (store_expire_timer, _) = self
+                let store_expire_timer = self
                     .store
                     .expire_timer(&Thread::Group(master_key_bytes))
                     .unwrap_or_default();
 
-                *timer = store_expire_timer;
+                *timer = store_expire_timer.map(|(t, _)| t);
             }
             _ => {}
         }
@@ -1547,6 +1550,7 @@ async fn save_message<S: Store>(
                         profile_key: profile_key.bytes.to_vec(),
                         color: None,
                         expire_timer: data_message.expire_timer.unwrap_or_default(),
+                        expire_timer_version: data_message.expire_timer_version.unwrap_or(1),
                         inbox_position: 0,
                         archived: false,
                         avatar: None,
