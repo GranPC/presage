@@ -7,8 +7,8 @@ edition = "2021"
 license = "AGPL-3.0-only"
 
 [dependencies]
-libsignal-service = { git = "https://github.com/GranPC/libsignal-service-rs", rev = "80fe44852bb9b500d60408334b3bec8bb53e64e1" }
-libsignal-service-hyper = { git = "https://github.com/GranPC/libsignal-service-rs", rev = "80fe44852bb9b500d60408334b3bec8bb53e64e1" }
+libsignal-service = { git = "https://github.com/GranPC/libsignal-service-rs", rev = "1616933da22912028556f2cff4f7d742185305d3" }
+libsignal-service-hyper = { git = "https://github.com/GranPC/libsignal-service-rs", rev = "1616933da22912028556f2cff4f7d742185305d3" }
 
 base64 = "0.22"
 futures = "0.3"
